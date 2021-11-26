@@ -41,15 +41,32 @@ while True:
     elif key == ord("c"):
         break
 # if there are two reference points, then crop the region of interest
-# from teh image and display it
+# from the image and display it
 if len(refPt) == 2:
     roi = clone[refPt[0][1]:refPt[1][1], refPt[0][0]:refPt[1][0]]
-    print(roi.shape)
+    w, h, r = roi.shape[::-1]
+    methods = ['cv2.TM_CCOEFF', 'cv2.TM_CCOEFF_NORMED', 'cv2.TM_CCORR',
+               'cv2.TM_CCORR_NORMED', 'cv2.TM_SQDIFF', 'cv2.TM_SQDIFF_NORMED']
+    for meth in methods:
+        img = clone.copy()
+        method = eval(meth)
+        # Apply template Matching
+        res = cv2.matchTemplate(img, roi, method)
+        min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+        # If the method is TM_SQDIFF or TM_SQDIFF_NORMED, take minimum
+        if method in [cv2.TM_SQDIFF, cv2.TM_SQDIFF_NORMED]:
+            top_left = min_loc
+        else:
+            top_left = max_loc
+        bottom_right = (top_left[0] + w, top_left[1] + h)
+        cv2.rectangle(img, top_left, bottom_right, 255, 2)
+        cv2.imshow("img", img)
+        cv2.waitKey(0)
     # cv2.imshow("ROI", roi)
     # cv2.waitKey(0)
 # close all open windows
-cv2.matchTemplate
 cv2.destroyAllWindows()
+
 
 # def main():
 
