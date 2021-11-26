@@ -4,6 +4,14 @@ refPt = []
 cropping = False
 
 
+def rotate(img, angle, rotPoint=None):
+    (height, width) = img.shape[:2]
+    if rotPoint is None:
+        rotPoint = (width//2, height//2)
+    rotMat = cv2.getRotationMatrix2D(rotPoint, angle, 1.0)
+    dimensions = (width, height)
+    return cv2.warpAffine(img, rotMat, dimensions)
+
 def click_and_crop(event, x, y, flags, param):
     # grab references to the global variables
     global refPt, cropping
@@ -24,6 +32,7 @@ def click_and_crop(event, x, y, flags, param):
         cv2.rectangle(image, refPt[0], refPt[1], (0, 255, 0), 2)
         cv2.imshow("image", image)
 
+# def detect_apprarances
 
 path = "test.png"
 original_image = cv2.imread(path)
@@ -43,8 +52,11 @@ while True:
         break
 # if there are two reference points, then crop the region of interest
 # from the image and display it
+roi = clone[refPt[0][1]:refPt[1][1], refPt[0][0]:refPt[1][0]]
+rotated = rotate(roi, -25, None)
+cv2.imshow("Rotated", rotated)
+cv2.waitKey(0)
 if len(refPt) == 2:
-    roi = clone[refPt[0][1]:refPt[1][1], refPt[0][0]:refPt[1][0]]
     r, w, h = roi.shape[::-1]
 
     res = cv2.matchTemplate(clone, roi, cv2.TM_CCOEFF_NORMED)
